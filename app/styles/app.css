@@ -266,6 +266,26 @@ button.reset:hover:not(:has(> *)) {
   align-items: center;
   display: flex;
 }
+
+.cart-btn {
+  background-color: #651fff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cart-btn:active {
+  transform: scale(0.98);
+}
+
+.cart-btn:hover {
+  background-color: #4a00b3;
+}
+
 /*
 * --------------------------------------------------
 * components/Search
