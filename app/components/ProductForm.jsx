@@ -1,5 +1,5 @@
 import {Link} from '@remix-run/react';
-import {VariantSelector} from '@shopify/hydrogen';
+import {VariantSelector, ShopPayButton} from '@shopify/hydrogen';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 
@@ -12,6 +12,7 @@ import {useAside} from '~/components/Aside';
  */
 export function ProductForm({product, selectedVariant, variants}) {
   const {open} = useAside();
+
   return (
     <div className="product-form">
       <VariantSelector
@@ -22,25 +23,31 @@ export function ProductForm({product, selectedVariant, variants}) {
         {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
       <br />
-      <AddToCartButton
-        disabled={!selectedVariant || !selectedVariant.availableForSale}
-        onClick={() => {
-          open('cart');
-        }}
-        lines={
-          selectedVariant
-            ? [
-                {
-                  merchandiseId: selectedVariant.id,
-                  quantity: 1,
-                  selectedVariant,
-                },
-              ]
-            : []
-        }
-      >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
-      </AddToCartButton>
+      <div className="cart-btns">
+        <AddToCartButton
+          disabled={!selectedVariant || !selectedVariant.availableForSale}
+          onClick={() => {
+            open('cart');
+          }}
+          lines={
+            selectedVariant
+              ? [
+                  {
+                    merchandiseId: selectedVariant.id,
+                    quantity: 1,
+                    selectedVariant,
+                  },
+                ]
+              : []
+          }
+        >
+          {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+        </AddToCartButton>
+        <ShopPayButton
+          variantIds={[selectedVariant.id]}
+          storeDomain={'your-store.myshopify.com'}
+        />
+      </div>
     </div>
   );
 }

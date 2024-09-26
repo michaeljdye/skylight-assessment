@@ -267,11 +267,17 @@ button.reset:hover:not(:has(> *)) {
   display: flex;
 }
 
+.cart-btns {
+  max-width: 260px;
+}
+
 .cart-btn {
-  background-color: #651fff;
-  color: #fff;
-  border: none;
+  width: 100%;
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #000;
   border-radius: 5px;
+  margin: 10px 0 10px 0;
   padding: 10px 20px;
   font-size: 1rem;
   font-weight: 500;
@@ -283,7 +289,8 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .cart-btn:hover {
-  background-color: #4a00b3;
+  background-color: #000;
+  color: #fff;
 }
 
 /*
