@@ -1,5 +1,5 @@
-import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
+import {defer, json, redirect} from '@shopify/remix-oxygen';
+import {useLoaderData, Link, useFetcher} from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
@@ -8,6 +8,7 @@ import {
 } from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {useEffect, useState} from 'react';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -35,6 +36,16 @@ export async function loader(args) {
  * @param {LoaderFunctionArgs}
  */
 async function loadCriticalData({context, params, request}) {
+  const sortBy = new URL(request.url).searchParams.get('sortBy');
+  let sortKey = '';
+
+  if (sortBy?.startsWith('price')) {
+    sortKey = 'PRICE';
+  } else {
+    sortKey = 'COLLECTION_DEFAULT';
+  }
+
+  const isReverse = sortBy === 'price_descending';
   const {handle} = params;
   const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
@@ -47,7 +58,12 @@ async function loadCriticalData({context, params, request}) {
 
   const [{collection}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: {handle, ...paginationVariables},
+      variables: {
+        handle,
+        ...paginationVariables,
+        sortKey,
+        reverse: isReverse ? true : false,
+      },
       // Add other queries here, so that they are loaded in parallel
     }),
   ]);
@@ -75,14 +91,32 @@ function loadDeferredData({context}) {
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
+  const [sortValue, setSortValue] = useState('collection_default');
   const {collection} = useLoaderData();
+  const fetcher = useFetcher({key: 'sort-products'});
+
+  const handleSortChange = (e) => {
+    const {value} = e.target;
+
+    setSortValue(value);
+
+    fetcher.load(`/collections/${collection.handle}?sortBy=${value}`);
+  };
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       <p className="collection-description">{collection.description}</p>
+      <fetcher.Form>
+        <select name="sort-value" value={sortValue} onChange={handleSortChange}>
+          <option value="collection_default">Default</option>
+          <option value="price_ascending">Price L-H</option>
+          <option value="price_descending">Price H-L</option>
+        </select>
+        <button type="submit">Submit</button>
+      </fetcher.Form>
       <PaginatedResourceSection
-        connection={collection.products}
+        connection={fetcher?.data?.collection?.products || collection.products}
         resourcesClassName="products-grid"
       >
         {({node: product, index}) => (
@@ -184,6 +218,8 @@ const COLLECTION_QUERY = `#graphql
     $last: Int
     $startCursor: String
     $endCursor: String
+    $sortKey: ProductCollectionSortKeys
+    $reverse: Boolean
   ) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       id
@@ -194,8 +230,10 @@ const COLLECTION_QUERY = `#graphql
         first: $first,
         last: $last,
         before: $startCursor,
-        after: $endCursor
-      ) {
+        after: $endCursor,
+        sortKey: $sortKey 
+        reverse: $reverse     
+        ) {
         nodes {
           ...ProductItem
         }
