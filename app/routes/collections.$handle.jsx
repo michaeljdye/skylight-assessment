@@ -103,8 +103,6 @@ export default function Collection() {
   const cursor = searchParams.get('cursor');
   const direction = searchParams.get('direction');
 
-  console.log('cursor', cursor);
-
   const handleSortChange = (e) => {
     navigate({
       pathname: `/collections/${collection.handle}`,

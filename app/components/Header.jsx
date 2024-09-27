@@ -57,6 +57,8 @@ export function HeaderMenu({
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
+        console.log('item', item);
+
         // if the url is internal, we strip the domain
         const url =
           item.url.includes('myshopify.com') ||
@@ -88,7 +90,7 @@ export function HeaderMenu({
 function HeaderCtas({isLoggedIn, cart}) {
   return (
     <nav className="header-ctas" role="navigation">
-      <NavLink to="/products" className="header-btn">
+      <NavLink to="products/all" className="header-btn">
         All Products
       </NavLink>
       <HeaderMenuMobileToggle />
