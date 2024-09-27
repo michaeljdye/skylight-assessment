@@ -439,7 +439,6 @@ button.reset:hover:not(:has(> *)) {
   height: auto;
   width: 100%;
 }
-
 /*
 * --------------------------------------------------
 * routes/products.$handle.tsx

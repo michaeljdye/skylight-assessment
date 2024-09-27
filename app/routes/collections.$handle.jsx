@@ -1,5 +1,11 @@
-import {defer, json, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link, useFetcher} from '@remix-run/react';
+import {defer, redirect} from '@shopify/remix-oxygen';
+import {
+  useLoaderData,
+  Link,
+  useNavigate,
+  useSearchParams,
+  createSearchParams,
+} from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
@@ -8,7 +14,6 @@ import {
 } from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import {useState} from 'react';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -91,32 +96,37 @@ function loadDeferredData({context}) {
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
-  const [sortValue, setSortValue] = useState('collection_default');
   const {collection} = useLoaderData();
-  const fetcher = useFetcher({key: 'sort-products'});
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const cursor = searchParams.get('cursor');
+  const direction = searchParams.get('direction');
+
+  console.log('cursor', cursor);
 
   const handleSortChange = (e) => {
-    const {value} = e.target;
-
-    setSortValue(value);
-
-    fetcher.load(`/collections/${collection.handle}?sortBy=${value}`);
+    navigate({
+      pathname: `/collections/${collection.handle}`,
+      search: createSearchParams({
+        sortBy: e.target.value,
+        ...(cursor && {cursor}),
+        ...(direction && {direction}),
+      }).toString(),
+    });
   };
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       <p className="collection-description">{collection.description}</p>
-      <fetcher.Form>
-        <select name="sort-value" value={sortValue} onChange={handleSortChange}>
-          <option value="collection_default">Default</option>
-          <option value="price_ascending">Price L-H</option>
-          <option value="price_descending">Price H-L</option>
-        </select>
-        <button type="submit">Submit</button>
-      </fetcher.Form>
+      <select name="sort-value" onChange={handleSortChange}>
+        <option value="collection_default">Default</option>
+        <option value="price_ascending">Price L-H</option>
+        <option value="price_descending">Price H-L</option>
+      </select>
       <PaginatedResourceSection
-        connection={fetcher?.data?.collection?.products || collection.products}
+        connection={collection.products}
         resourcesClassName="products-grid"
       >
         {({node: product, index}) => (
