@@ -8,7 +8,7 @@ import {
 } from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 
 /**
  * @type {MetaFunction<typeof loader>}

@@ -45,7 +45,7 @@ export function ProductForm({product, selectedVariant, variants}) {
         </AddToCartButton>
         <ShopPayButton
           variantIds={[selectedVariant.id]}
-          storeDomain={'https://demostore.mock.shop'}
+          storeDomain="https://demostore.mock.shop"
         />
       </div>
     </div>
